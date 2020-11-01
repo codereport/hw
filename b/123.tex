@@ -1,0 +1,160 @@
+\documentclass{article}
+
+% Formatting
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage[titletoc,title]{appendix}
+
+% Math
+% https://www.overleaf.com/learn/latex/Mathematical_expressions
+% https://en.wikibooks.org/wiki/LaTeX/Mathematics
+\usepackage{amsmath,amsfonts,amssymb,mathtools}
+
+% Images
+% https://www.overleaf.com/learn/latex/Inserting_Images
+% https://en.wikibooks.org/wiki/LaTeX/Floats,_Figures_and_Captions
+\usepackage{graphicx,float}
+
+% Tables
+% https://www.overleaf.com/learn/latex/Tables
+% https://en.wikibooks.org/wiki/LaTeX/Tables
+
+% Algorithms
+% https://www.overleaf.com/learn/latex/algorithms
+% https://en.wikibooks.org/wiki/LaTeX/Algorithms
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{algorithmic}
+
+% Code syntax highlighting
+% https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted
+\usepackage{minted}
+\usemintedstyle{borland}
+
+% References
+% https://www.overleaf.com/learn/latex/Bibliography_management_in_LaTeX
+% https://en.wikibooks.org/wiki/LaTeX/Bibliography_Management
+\usepackage{biblatex}
+\addbibresource{references.bib}
+
+% Title content
+\title{CP8201 Homework 2}
+\author{Conor Hoekstra}
+\date{October 31, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{}
+
+\subsection{Overview}
+The main idea needed to solve this problem in O(nm) time complexity is a dynamic programming technique called memoization. The general idea is for each point, we will \textit{walk} around the circumference by skipping to the end of each line and then finding the next non-overlapping line. At each point, we will memoize the number of lines included so far between [start, end] where \textit{start} was your starting point and \textit{end} is your current position. For future points/lines, redundant computation can then be avoided. When \textit{walking} the circumference and searching for the \texit{next line}, only consider lines that extend in the direction you are \textit{walking}.
+
+\paragraph{}
+A key thing to understand about this problem is when \textit{lines intersect}. A line that has no end points of any other lines in between the start point (A) and end point (B) of the line (note: there are two ways to travel between two points on a circle, always travel the shortest of the two distances when checking for \textit{end points in between}) does not intersect with any line. Lines that \textit{do} have end points in [A, B] intersect with all of the lines that start at one of those \textit{in-between points} and that end at an end point outside of [A, B].
+
+\subsection{Pseudocode}
+
+\begin{algorithm}
+\begin{algorithmic}
+    \STATE{HashMap$\langle$Int, TreeMap$\langle$Int, Int$\rangle\rangle$  memo \textit{// Int, Int, Int = Start Point, End Point, Line Count}}
+    \STATE{answer = 0}
+    \FOR{each $point$}
+        \STATE{line = find shortest line starting at this $point$}
+        \STATE{start = line.start}
+        \STATE{end   = line.end}
+        \STATE{count = 0}
+        \WHILE{end $<$ start}
+            \STATE{count += 1}
+            \STATE{memo[start][end] = count}
+            \STATE{nextStart = find next nearest point \textit{// (not equal to end)}}
+            \IF{memo.contains(nextStart)}
+                \STATE{memoizedCount = max(find largest less than $start$ in memo[$nextStart$], 0)}
+                \STATE{count += memoizedCount}
+                \STATE{\textbf{break}}
+            \ENDIF
+            \STATE{nextLine = find shortest line starting at $nextStart$}
+            \STATE{end = nextLine.end}
+        \ENDWHILE
+        \STATE{answer = max(answer, count)}
+    \ENDFOR
+\end{algorithmic}
+\caption{Pseudocode}
+\label{alg:example}
+\end{algorithm}
+
+\section{}
+\subsection{Overview}
+The solution for this problem is almost identical to the solution for Question 1. The only adjustment we need to make is in our definition of \textit{overlapping}. For this problem, \textit{overlapping} does not include the end points. Once that adjustment is made, the rest of the algorithm is identical.
+
+\subsection{Pseudocode}
+
+For the pseudocode, all we need to change is \textbf{not equal to end} to \textbf{can be equal to end}.
+
+\begin{algorithm}
+\begin{algorithmic}
+    \STATE{HashMap$\langle$Int, TreeMap$\langle$Int, Int$\rangle\rangle$  memo \textit{// Int, Int, Int = Start Point, End Point, Line Count}}
+    \STATE{answer = 0}
+    \FOR{each $point$}
+        \STATE{line = find shortest line starting at this $point$}
+        \STATE{start = line.start}
+        \STATE{end   = line.end}
+        \STATE{count = 0}
+        \WHILE{end $<$ start}
+            \STATE{count += 1}
+            \STATE{memo[start][end] = count}
+            \STATE{nextStart = find next nearest point \textit{// (can be equal to end)}}
+            \IF{memo.contains(nextStart)}
+                \STATE{memoizedCount = max(find largest less than $start$ in memo[$nextStart$], 0)}
+                \STATE{count += memoizedCount}
+                \STATE{\textbf{break}}
+            \ENDIF
+            \STATE{nextLine = find shortest line starting at $nextStart$}
+            \STATE{end = nextLine.end}
+        \ENDWHILE
+        \STATE{answer = max(answer, count)}
+    \ENDFOR
+\end{algorithmic}
+\caption{Pseudocode}
+\label{alg:example}
+\end{algorithm}
+
+\newpage{}
+\section{}
+
+\subsection{Overview}
+For the final question, we start from our solution in Question 1 and make only a small change. Instead of just memoizing and keeping track of the \textit{number of lines}, we need to memoize and keep track of a list of lines.
+
+\subsection{Pseudocode}
+
+\begin{algorithm}
+\begin{algorithmic}
+    \STATE{HashMap$\langle$Int, TreeMap$\langle$Int, List[Int]$\rangle\rangle$  memo \textit{// Int, Int, List[Int] = Start Point, End Point, Lines}}
+    \STATE{answer = []}
+    \FOR{each $point$}
+        \STATE{line = find shortest line starting at this $point$}
+        \STATE{start = line.start}
+        \STATE{end   = line.end}
+        \STATE{lines = []}
+        \WHILE{end $<$ start}
+            \STATE{lines.push(line)}
+            \STATE{memo[start][end] = lines}
+            \STATE{nextStart = find next nearest point \textit{// (not equal to end)}}
+            \IF{memo.contains(nextStart)}
+                \STATE{memoizedLines = max(find largest less than $start$ in memo[$nextStart$], 0)}
+                \STATE{lines.append(memoizedLines)}
+                \STATE{\textbf{break}}
+            \ENDIF
+            \STATE{line = find shortest line starting at $nextStart$}
+            \STATE{end = nextLine.end}
+        \ENDWHILE
+        \IF{lines.size() $>$ answer.size()}
+            \STATE{answer = lines}
+        \ENDIF
+    \ENDFOR
+\end{algorithmic}
+\caption{Pseudocode}
+\label{alg:example}
+\end{algorithm}
+
+\end{document}
