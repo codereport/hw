@@ -1,0 +1,95 @@
+
+\documentclass{article}
+
+% Formatting
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage[titletoc,title]{appendix}
+
+% Math
+% https://www.overleaf.com/learn/latex/Mathematical_expressions
+% https://en.wikibooks.org/wiki/LaTeX/Mathematics
+\usepackage{amsmath,amsfonts,amssymb,mathtools}
+
+% Images
+% https://www.overleaf.com/learn/latex/Inserting_Images
+% https://en.wikibooks.org/wiki/LaTeX/Floats,_Figures_and_Captions
+\usepackage{graphicx,float}
+
+% Tables
+% https://www.overleaf.com/learn/latex/Tables
+% https://en.wikibooks.org/wiki/LaTeX/Tables
+
+% Algorithms
+% https://www.overleaf.com/learn/latex/algorithms
+% https://en.wikibooks.org/wiki/LaTeX/Algorithms
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{algorithmic}
+
+% Code syntax highlighting
+% https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted
+\usepackage{minted}
+\usemintedstyle{borland}
+
+% References
+% https://www.overleaf.com/learn/latex/Bibliography_management_in_LaTeX
+% https://en.wikibooks.org/wiki/LaTeX/Bibliography_Management
+\usepackage{biblatex}
+\addbibresource{references.bib}
+
+\usepackage{hyperref}
+
+\newlength\myindent
+\setlength\myindent{2em}
+\newcommand\bindent{%
+  \begingroup
+  \setlength{\itemindent}{\myindent}
+  \addtolength{\algorithmicindent}{\myindent}
+}
+\newcommand\eindent{\endgroup}
+
+% Title content
+\title{CP8201 Homework 3 - Conor Hoekstra}
+\author{Conor Hoekstra\\Reminder: you approved an extension for this assignment to Nov 16}
+\date{November 15, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{}
+
+\subsection{}
+
+The main idea here is to implement a function inverse that takes a polynomial \textit{f} and an integer \textit{t} and finds the 1/2\textsuperscript{t}-approximation of the inverse of \textit{f} by diving 1 by the polynomial \textit{f}. We can do this by representing our polynomial \textit{f} by an array of floating point numbers. We then perform long division of \textit{f} into 1.
+
+\begin{algorithm}
+\begin{algorithmic}
+    \STATE{type polynomial = array}
+    \STATE{\textbf{function} inverse(f: polynomial, t: int)}
+        \bindent
+        \STATE{result = polynomial of length t}
+        \STATE{temp = polynomial of length t \textit{// use this for keep track of the remainder}}
+        \STATE{temp[0] = 1 \textit{// initialize temp to be the polynomial representing a single 1}}
+        \FOR{i = 0; i $<$ t; i += 1}
+            \STATE{coefficient = temp[i] / f[0]}
+            \STATE{result[i] = coefficient}
+            \FOR{j = 0; j + i $<$ t; j += 1}
+                \STATE{temp[j + i] -= coefficient * f[j]}
+            \ENDFOR
+        \ENDFOR
+        \RETURN{result}
+        \eindent
+    \STATE{\textbf{end function}}
+\end{algorithmic}
+\caption{Pseudocode}
+\label{alg:example}
+\end{algorithm}
+
+\subsection{}
+The time complexity of my function is O(t\textsuperscript{2}) as we have two nested for loops with that are bound by \textit{t}.
+
+\subsection{}
+As a bonus, compiling / working solution in C++ \underline{\href{https://www.godbolt.org/z/bfccob}{can be seen here}}.
+
+\end{document}
